@@ -35,11 +35,11 @@ const parseDate = (date: any): string => {
   return date;
 };
 
-const parseName = (name: any): string => {
-  if (!name || !isString(name)) {
-    throw new Error(`Incorrect or missing name: ${name}`);
+const parseStringAttribute = (param: any, description: string): string => {
+  if (!param || !isString(param)) {
+    throw new Error(`Incorrect or missing ${description}: ${param}`);
   }
-  return name;
+  return param;
 };
 
 const parseGender = (gender: any): Gender => {
@@ -47,55 +47,6 @@ const parseGender = (gender: any): Gender => {
     throw new Error(`Incorrect or missing gender: ${gender}`);
   }
   return gender;
-};
-
-const parseOccupation = (occupation: any): string => {
-  if (!occupation || !isString(occupation)) {
-    throw new Error(`Incorrect or missing occupation: ${occupation}`);
-  }
-  return occupation;
-};
-
-const parseSSN = (ssn: any): string => {
-  if (!ssn || !isString(ssn)) {
-    throw new Error(`Incorrect or missing SSN: ${ssn}`);
-  }
-  return ssn;
-};
-
-const parseType = (type: any): string => {
-  if (!type || !isString(type)) {
-    throw new Error(`Incorrect or missing entry type: ${type}`);
-  }
-  return type;
-};
-
-const parseDescription = (description: any): string => {
-  if (!description || !isString(description)) {
-    throw new Error(`Incorrect or missing description: ${description}`);
-  }
-  return description;
-};
-
-const parseSpecialist = (specialist: any): string => {
-  if (!specialist || !isString(specialist)) {
-    throw new Error(`Incorrect or missing specialist: ${specialist}`);
-  }
-  return specialist;
-};
-
-const parseCriteria = (criteria: any): string => {
-  if (!criteria || !isString(criteria)) {
-    throw new Error(`Incorrect or missing criteria: ${criteria}`);
-  }
-  return criteria;
-};
-
-const parseEmployerName = (employer: any): string => {
-  if (!employer || !isString(employer)) {
-    throw new Error(`Incorrect or missing employer: ${employer}`);
-  }
-  return employer;
 };
 
 const parseDiagnosisCodes = (diagnosisCodes: any): Array<Diagnosis["code"]> => {
@@ -114,7 +65,6 @@ const parseDiagnosisCodes = (diagnosisCodes: any): Array<Diagnosis["code"]> => {
 };
 
 const parseHealthCheckRating = (rating: any): number => {
-  console.log(isNumber(rating));
   if (rating === undefined || !isNumber(rating)) {
     console.log("oing");
     throw new Error(`Incorrect or missing HealthCheckRating: ${rating}`);
@@ -124,11 +74,11 @@ const parseHealthCheckRating = (rating: any): number => {
 
 export const toNewPatientObject = (newPatientObject: any): PatientWithoutId => {
   const newPatient: PatientWithoutId = {
-    name: parseName(newPatientObject.name),
+    name: parseStringAttribute(newPatientObject.name, "name"),
     dateOfBirth: parseDate(newPatientObject.dateOfBirth),
-    ssn: parseSSN(newPatientObject.ssn),
+    ssn: parseStringAttribute(newPatientObject.ssn, "SSN"),
     gender: parseGender(newPatientObject.gender),
-    occupation: parseOccupation(newPatientObject.occupation),
+    occupation: parseStringAttribute(newPatientObject.occupation, "occupation"),
     entries: [],
   };
   return newPatient;
@@ -137,14 +87,17 @@ export const toNewPatientObject = (newPatientObject: any): PatientWithoutId => {
 export const toNewEntryObject = (newEntryObject: any): Entry => {
   const baseEntry: BaseEntry = {
     id: uuid(),
-    description: parseDescription(newEntryObject.description),
+    description: parseStringAttribute(
+      newEntryObject.description,
+      "description"
+    ),
     date: parseDate(newEntryObject.date),
-    specialist: parseSpecialist(newEntryObject.specialist),
+    specialist: parseStringAttribute(newEntryObject.specialist, "specialist"),
     diagnosisCodes:
       parseDiagnosisCodes(newEntryObject.diagnosisCodes) || undefined,
   };
 
-  const type = parseType(newEntryObject.type);
+  const type = parseStringAttribute(newEntryObject.type, "type");
 
   if (type === "HealthCheck") {
     const entry: HealthCheckEntry = {
@@ -161,7 +114,10 @@ export const toNewEntryObject = (newEntryObject: any): Entry => {
       type: type,
       discharge: {
         date: parseDate(newEntryObject.discharge.date),
-        criteria: parseCriteria(newEntryObject.discharge.criteria),
+        criteria: parseStringAttribute(
+          newEntryObject.discharge.criteria,
+          "criteria"
+        ),
       },
     };
     return entry;
@@ -169,7 +125,10 @@ export const toNewEntryObject = (newEntryObject: any): Entry => {
     const entry: OccupationalHealthCareEntry = {
       ...baseEntry,
       type: "OccupationalHealthcare",
-      employerName: parseEmployerName(newEntryObject.employerName),
+      employerName: parseStringAttribute(
+        newEntryObject.employerName,
+        "employerName"
+      ),
       sickLeave: {
         startDate: parseDate(newEntryObject.sickLeave.startDate),
         endDate: parseDate(newEntryObject.sickLeave.endDate),
